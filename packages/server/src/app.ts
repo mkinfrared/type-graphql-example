@@ -1,5 +1,12 @@
-import getSchema from "@util/getSchema";
 // import { redis } from "@util/redis";
+import { ApolloServer } from "apollo-server-express";
+import bodyParser from "body-parser";
+import connectRedis from "connect-redis";
+import cors from "cors";
+import express from "express";
+import session from "express-session";
+
+import formatError from "@util/formatError";
 import {
   // FRONTEND_HOST,
   NODE_ENV,
@@ -8,24 +15,20 @@ import {
   SERVER_PORT,
   SESSION_SECRET
 } from "@util/secrets";
-import { ApolloServer } from "apollo-server-express";
-import bodyParser from "body-parser";
-import connectRedis from "connect-redis";
-import cors from "cors";
-import express from "express";
-import session from "express-session";
+import getSchema from "@util/getSchema";
 
-export const startServer = async () => {
+const startServer = async () => {
   const RedisStore = connectRedis(session);
   const apolloServer = new ApolloServer({
-    schema: await getSchema()
+    schema: await getSchema(),
+    formatError
   });
 
   const app = express();
 
   app.use(
     cors({
-      origin: "*",
+      origin: "http://localhost:3000",
       credentials: true
     })
   );
@@ -60,3 +63,5 @@ export const startServer = async () => {
 
   return server;
 };
+
+export default startServer;

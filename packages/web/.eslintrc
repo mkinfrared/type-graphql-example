@@ -1,0 +1,35 @@
+{
+  "extends": ["../../.eslintrc"],
+  "rules": {
+    "no-console": "error",
+    "import/no-named-as-default": "off",
+    "react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }],
+    "react/state-in-constructor": "off",
+    "react/prop-types": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/no-unescaped-entities": "off",
+    "react/destructuring-assignment": "off",
+    "spaced-comment": [
+      "error",
+      "always",
+      {
+        "markers": ["/"]
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "directory": "./packages/web/"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.type.ts"],
+      "rules": {
+        "import/group-exports": "off"
+      }
+    }
+  ]
+}

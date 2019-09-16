@@ -1,0 +1,30 @@
+@import "styles/shared";
+
+.SignUp {
+  @extend .register-card;
+
+  h4 {
+    margin-bottom: 20px;
+  }
+
+  .paper {
+    padding: 20px;
+    width: 100%;
+
+    .inputFields {
+      .input {
+        &:not(:last-child) {
+          margin-bottom: 20px;
+        }
+      }
+    }
+
+    > p {
+      margin-top: 20px;
+    }
+
+    > button {
+      margin-top: 20px;
+    }
+  }
+}

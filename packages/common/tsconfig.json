@@ -6,15 +6,6 @@
     "experimentalDecorators": true,
     "isolatedModules": false,
     "outDir": "./build",
-    "baseUrl": "src",
-    "paths": {
-      "@controllers/*": ["controllers/*"],
-      "@db/*": ["db/*"],
-      "@middleware/*": ["middleware/*"],
-      "@public/*": ["public/*"],
-      "@routes/*": ["routes/*"],
-      "@util/*": ["util/*"]
-    },
     "plugins": [{ "transform": "typescript-transform-paths" }]
   },
   "exclude": ["node_modules"],

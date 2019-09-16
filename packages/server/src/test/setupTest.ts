@@ -2,7 +2,7 @@ import createOrmConnection from "@db/createOrmConnection";
 import { Server } from "http";
 import { Connection } from "typeorm";
 
-import { startServer } from "../app";
+import startServer from "../app";
 
 export let httpServer: Server;
 let connection: Connection;
