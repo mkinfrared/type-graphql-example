@@ -6,7 +6,7 @@ module.exports = {
   },
   setupFilesAfterEnv: ["<rootDir>/src/test/setupTest.ts"],
   moduleNameMapper: {
-    "@controllers/(.*)": "<rootDir>/src/controllers/$1",
+    "@controllers/(.*)": "<rootDir>/src/containers/$1",
     "@db/(.*)": "<rootDir>/src/db/$1",
     "@emails/(.*)": "<rootDir>/src/emails/$1",
     "@messages/(.*)": "<rootDir>/src/messages/$1",

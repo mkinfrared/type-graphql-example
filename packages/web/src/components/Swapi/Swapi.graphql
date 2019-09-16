@@ -1,0 +1,8 @@
+query AllFilms {
+  allFilms {
+    id
+    title
+    director
+    producers
+  }
+}

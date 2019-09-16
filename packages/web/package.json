@@ -3,20 +3,44 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@types/jest": "24.0.18",
-    "@types/node": "12.7.2",
+    "@apollo/react-hooks": "^3.1.0",
+    "@bookstore/common": "0.0.0",
+    "@material-ui/core": "^4.4.1",
+    "@material-ui/icons": "^4.4.1",
     "@types/react": "16.9.2",
     "@types/react-dom": "16.9.0",
+    "apollo-boost": "^0.4.4",
+    "formik": "^1.5.8",
+    "graphql": "^14.5.4",
+    "graphql-tag": "^2.10.1",
+    "notistack": "^0.9.0",
     "react": "^16.9.0",
+    "react-apollo": "^3.1.0",
     "react-dom": "^16.9.0",
     "react-scripts": "3.1.1",
     "typescript": "3.5.3"
   },
+  "devDependencies": {
+    "@apollo/react-testing": "^3.1.0",
+    "@types/enzyme": "^3.9.4",
+    "@types/enzyme-adapter-react-16": "^1.0.5",
+    "@types/jest": "24.0.18",
+    "@types/node": "12.7.2",
+    "cross-env": "^5.2.0",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "enzyme-to-json": "^3.3.5",
+    "jest-enzyme": "^7.0.2",
+    "node-sass": "^4.12.0",
+    "open-cli": "^5.0.0",
+    "tslint-react": "^4.0.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "cross-env CI=true react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "cross-env CI=true react-scripts test --collectCoverage",
+    "eject": "react-scripts eject",
+    "coverage": "open-cli ./coverage/lcov-report/index.html"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -33,9 +57,21 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "cross-env": "^5.2.0",
-    "node-sass": "^4.12.0",
-    "tslint-react": "^4.0.0"
-  }
+  "jest": {
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": -10
+      }
+    }
+  },
+  "proxy": "http://localhost:4000"
 }
