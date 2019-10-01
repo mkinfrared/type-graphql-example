@@ -1,10 +1,11 @@
+import nodemailer from "nodemailer";
+
 import {
   COMPANY_EMAIL,
   COMPANY_NAME,
   EMAIL_PASSWORD,
   EMAIL_USERNAME
 } from "@util/secrets";
-import nodemailer from "nodemailer";
 
 export default async (
   email: string,

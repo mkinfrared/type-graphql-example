@@ -37,8 +37,13 @@ const registerValidation = yup.object().shape({
   password: passwordValidation,
   passwordConfirm: yup
     .string()
-    .required()
+    .required("confirm is a required field")
     .oneOf([yup.ref("password")], "passwords should match")
 });
 
-export { passwordValidation, registerValidation };
+const loginValidation = yup.object().shape({
+  username: yup.string().required(),
+  password: yup.string().required()
+});
+
+export { loginValidation, passwordValidation, registerValidation };

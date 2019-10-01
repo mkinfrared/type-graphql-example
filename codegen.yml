@@ -21,3 +21,4 @@ generates:
       withHooks: true
       withResultType: true
       reactApolloVersion: 3
+watch: true
