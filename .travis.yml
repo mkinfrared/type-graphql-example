@@ -19,14 +19,14 @@ before_install:
   - sudo service postgresql stop
 
 stages:
-  - name: test
+#  - name: test
   - name: build
 
 jobs:
   include:
-    - stage: test
-      before_script: docker-compose build test
-      script: docker-compose run test
+#    - stage: test
+#      before_script: docker-compose build test
+#      script: docker-compose run test
 
     - stage: build
       before_script: docker-compose build build

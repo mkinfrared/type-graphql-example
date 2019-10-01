@@ -1,15 +1,19 @@
 import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import { SnackbarProvider } from "notistack";
 
-import Swapi from "components/Swapi";
-import SignUp from "containers/SignUp";
+import Routes from "routes";
 import css from "App.module.scss";
 
 const App: React.FC = () => {
   return (
-    <div className={css.App}>
-      <SignUp />
-      <Swapi />
-    </div>
+    <BrowserRouter>
+      <SnackbarProvider maxSnack={3}>
+        <div className={css.App}>
+          <Routes />
+        </div>
+      </SnackbarProvider>
+    </BrowserRouter>
   );
 };
 

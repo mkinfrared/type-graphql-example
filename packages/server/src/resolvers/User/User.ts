@@ -1,8 +1,21 @@
 import { registerValidation } from "@bookstore/common";
-import formatYupErrors from "@util/formatYupErrors";
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
-import { UserInputError } from "apollo-server-express";
+import { PubSubEngine, UserInputError } from "apollo-server-express";
+import bcrypt from "bcryptjs";
+import {
+  Arg,
+  Ctx,
+  Mutation,
+  PubSub,
+  Query,
+  Resolver,
+  Root,
+  Subscription
+} from "type-graphql";
 
+import { ServerContext } from "@type/Server.type";
+import generateTokens from "@util/generateTokens";
+import UserPayload from "@resolvers/User/types";
+import formatYupErrors from "@util/formatYupErrors";
 import User from "@db/entity/User";
 
 @Resolver()
@@ -12,7 +25,7 @@ class UserResolver {
     return "Hello world";
   }
 
-  @Mutation(returns => User)
+  @Mutation(returns => Boolean)
   async register(
     @Arg("email") email: string,
     @Arg("username") username: string,
@@ -47,10 +60,88 @@ class UserResolver {
       throw new UserInputError("Invalid input", error);
     }
 
-    const user = User.create({ email, username, password });
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = User.create({ email, username, password: hashedPassword });
     await user.save();
 
+    return true;
+  }
+
+  @Mutation(returns => User, { nullable: true })
+  async login(
+    @Arg("username") username: string,
+    @Arg("password") password: string,
+    @PubSub() pubSub: PubSubEngine,
+    @Ctx() context: ServerContext
+  ) {
+    const error: any = {};
+    error.username = ["Invalid credentials"];
+
+    const user = await User.findOne({ where: { username } });
+
+    if (!user) {
+      throw new UserInputError("Invalid input", error);
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+
+    if (!valid) {
+      throw new UserInputError("Invalid input", error);
+    }
+
+    const payload: UserPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username
+    };
+
+    const [accessToken, refreshToken] = await generateTokens({
+      userID: user.id
+    });
+
+    context.response.cookie("access-token", accessToken, { httpOnly: true });
+    context.response.cookie("refresh-token", refreshToken, { httpOnly: true });
+
+    await pubSub.publish("NEW_LOGIN", payload);
+
     return user;
+  }
+
+  @Query(returns => User, { nullable: true })
+  async currentUser(@Ctx() context: ServerContext) {
+    const { userID } = context.request;
+
+    if (!userID) {
+      return null;
+    }
+
+    const user = await User.findOne(userID);
+
+    return user;
+  }
+
+  @Subscription({ topics: "NEW_LOGIN" })
+  loginEvent(@Root() newLoginPayload: UserPayload): UserPayload {
+    return {
+      ...newLoginPayload,
+      date: new Date()
+    };
+  }
+
+  @Subscription({ topics: "NEW_LOGIN" })
+  logoutEvent(@Root() newLoginPayload: UserPayload): UserPayload {
+    return {
+      ...newLoginPayload,
+      date: new Date()
+    };
+  }
+
+  @Query(returns => Boolean, { nullable: true })
+  async logout(@Ctx() context: ServerContext) {
+    context.response.clearCookie("access-token");
+    context.response.clearCookie("refresh-token");
+
+    return true;
   }
 }
 

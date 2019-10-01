@@ -9,7 +9,5 @@ mutation RegisterUser(
     username: $username
     password: $password
     passwordConfirm: $passwordConfirm
-  ) {
-    email
-  }
+  )
 }

@@ -1575,7 +1575,8 @@ export type InvokeFunctionPayload = {
 
 export type Mutation = {
   __typename?: "Mutation";
-  register: User;
+  register: Scalars["Boolean"];
+  login?: Maybe<User>;
   createAsset?: Maybe<Asset>;
   createFilm?: Maybe<Film>;
   createPerson?: Maybe<Person>;
@@ -1630,6 +1631,11 @@ export type MutationRegisterArgs = {
   password: Scalars["String"];
   username: Scalars["String"];
   email: Scalars["String"];
+};
+
+export type MutationLoginArgs = {
+  password: Scalars["String"];
+  username: Scalars["String"];
 };
 
 export type MutationCreateAssetArgs = {
@@ -3436,6 +3442,8 @@ export type PlanetSubscriptionPayload = {
 export type Query = {
   __typename?: "Query";
   hello: Scalars["String"];
+  currentUser?: Maybe<User>;
+  logout?: Maybe<Scalars["Boolean"]>;
   allAssets: Array<Asset>;
   allFilms: Array<Film>;
   allPersons: Array<Person>;
@@ -5170,6 +5178,8 @@ export type StarshipSubscriptionPayload = {
 
 export type Subscription = {
   __typename?: "Subscription";
+  loginEvent: UserPayload;
+  logoutEvent: UserPayload;
   Asset?: Maybe<AssetSubscriptionPayload>;
   Film?: Maybe<FilmSubscriptionPayload>;
   Person?: Maybe<PersonSubscriptionPayload>;
@@ -5423,7 +5433,14 @@ export type User = {
   id: Scalars["ID"];
   email: Scalars["String"];
   username: Scalars["String"];
-  password: Scalars["String"];
+};
+
+export type UserPayload = {
+  __typename?: "UserPayload";
+  id: Scalars["ID"];
+  email: Scalars["String"];
+  username: Scalars["String"];
+  date: Scalars["DateTime"];
 };
 
 /** A Vehicle is a single transport craft that does not have hyperdrive capability. */
@@ -6204,6 +6221,17 @@ export type AllFilmsQuery = { __typename?: "Query" } & {
   >;
 };
 
+export type SignInUserMutationVariables = {
+  username: Scalars["String"];
+  password: Scalars["String"];
+};
+
+export type SignInUserMutation = { __typename?: "Mutation" } & {
+  login: Maybe<
+    { __typename?: "User" } & Pick<User, "id" | "email" | "username">
+  >;
+};
+
 export type RegisterUserMutationVariables = {
   email: Scalars["String"];
   username: Scalars["String"];
@@ -6211,8 +6239,17 @@ export type RegisterUserMutationVariables = {
   passwordConfirm: Scalars["String"];
 };
 
-export type RegisterUserMutation = { __typename?: "Mutation" } & {
-  register: { __typename?: "User" } & Pick<User, "email">;
+export type RegisterUserMutation = { __typename?: "Mutation" } & Pick<
+  Mutation,
+  "register"
+>;
+
+export type CurrentUserQueryVariables = {};
+
+export type CurrentUserQuery = { __typename?: "Query" } & {
+  currentUser: Maybe<
+    { __typename?: "User" } & Pick<User, "id" | "email" | "username">
+  >;
 };
 
 export const AllFilmsDocument = gql`
@@ -6292,6 +6329,82 @@ export type AllFilmsQueryResult = ApolloReactCommon.QueryResult<
   AllFilmsQuery,
   AllFilmsQueryVariables
 >;
+export const SignInUserDocument = gql`
+  mutation SignInUser($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      id
+      email
+      username
+    }
+  }
+`;
+export type SignInUserMutationFn = ApolloReactCommon.MutationFunction<
+  SignInUserMutation,
+  SignInUserMutationVariables
+>;
+export type SignInUserComponentProps = Omit<
+  ApolloReactComponents.MutationComponentOptions<
+    SignInUserMutation,
+    SignInUserMutationVariables
+  >,
+  "mutation"
+>;
+
+export const SignInUserComponent = (props: SignInUserComponentProps) => (
+  <ApolloReactComponents.Mutation<
+    SignInUserMutation,
+    SignInUserMutationVariables
+  >
+    mutation={SignInUserDocument}
+    {...props}
+  />
+);
+
+export type SignInUserProps<TChildProps = {}> = ApolloReactHoc.MutateProps<
+  SignInUserMutation,
+  SignInUserMutationVariables
+> &
+  TChildProps;
+export function withSignInUser<TProps, TChildProps = {}>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    SignInUserMutation,
+    SignInUserMutationVariables,
+    SignInUserProps<TChildProps>
+  >
+) {
+  return ApolloReactHoc.withMutation<
+    TProps,
+    SignInUserMutation,
+    SignInUserMutationVariables,
+    SignInUserProps<TChildProps>
+  >(SignInUserDocument, {
+    alias: "signInUser",
+    ...operationOptions
+  });
+}
+
+export function useSignInUserMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    SignInUserMutation,
+    SignInUserMutationVariables
+  >
+) {
+  return ApolloReactHooks.useMutation<
+    SignInUserMutation,
+    SignInUserMutationVariables
+  >(SignInUserDocument, baseOptions);
+}
+export type SignInUserMutationHookResult = ReturnType<
+  typeof useSignInUserMutation
+>;
+export type SignInUserMutationResult = ApolloReactCommon.MutationResult<
+  SignInUserMutation
+>;
+export type SignInUserMutationOptions = ApolloReactCommon.BaseMutationOptions<
+  SignInUserMutation,
+  SignInUserMutationVariables
+>;
 export const RegisterUserDocument = gql`
   mutation RegisterUser(
     $email: String!
@@ -6304,9 +6417,7 @@ export const RegisterUserDocument = gql`
       username: $username
       password: $password
       passwordConfirm: $passwordConfirm
-    ) {
-      email
-    }
+    )
   }
 `;
 export type RegisterUserMutationFn = ApolloReactCommon.MutationFunction<
@@ -6375,4 +6486,80 @@ export type RegisterUserMutationResult = ApolloReactCommon.MutationResult<
 export type RegisterUserMutationOptions = ApolloReactCommon.BaseMutationOptions<
   RegisterUserMutation,
   RegisterUserMutationVariables
+>;
+export const CurrentUserDocument = gql`
+  query CurrentUser {
+    currentUser {
+      id
+      email
+      username
+    }
+  }
+`;
+export type CurrentUserComponentProps = Omit<
+  ApolloReactComponents.QueryComponentOptions<
+    CurrentUserQuery,
+    CurrentUserQueryVariables
+  >,
+  "query"
+>;
+
+export const CurrentUserComponent = (props: CurrentUserComponentProps) => (
+  <ApolloReactComponents.Query<CurrentUserQuery, CurrentUserQueryVariables>
+    query={CurrentUserDocument}
+    {...props}
+  />
+);
+
+export type CurrentUserProps<TChildProps = {}> = ApolloReactHoc.DataProps<
+  CurrentUserQuery,
+  CurrentUserQueryVariables
+> &
+  TChildProps;
+export function withCurrentUser<TProps, TChildProps = {}>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    CurrentUserQuery,
+    CurrentUserQueryVariables,
+    CurrentUserProps<TChildProps>
+  >
+) {
+  return ApolloReactHoc.withQuery<
+    TProps,
+    CurrentUserQuery,
+    CurrentUserQueryVariables,
+    CurrentUserProps<TChildProps>
+  >(CurrentUserDocument, {
+    alias: "currentUser",
+    ...operationOptions
+  });
+}
+
+export function useCurrentUserQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<
+    CurrentUserQuery,
+    CurrentUserQueryVariables
+  >
+) {
+  return ApolloReactHooks.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(
+    CurrentUserDocument,
+    baseOptions
+  );
+}
+export function useCurrentUserLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    CurrentUserQuery,
+    CurrentUserQueryVariables
+  >
+) {
+  return ApolloReactHooks.useLazyQuery<
+    CurrentUserQuery,
+    CurrentUserQueryVariables
+  >(CurrentUserDocument, baseOptions);
+}
+
+export type CurrentUserQueryHookResult = ReturnType<typeof useCurrentUserQuery>;
+export type CurrentUserQueryResult = ApolloReactCommon.QueryResult<
+  CurrentUserQuery,
+  CurrentUserQueryVariables
 >;

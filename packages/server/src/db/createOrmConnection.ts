@@ -1,5 +1,9 @@
 /* istanbul ignore file */
 
+import path from "path";
+
+import { createConnection } from "typeorm";
+
 import {
   DB_HOST,
   DB_NAME,
@@ -7,12 +11,10 @@ import {
   DB_USERNAME,
   NODE_ENV
 } from "@util/secrets";
-import path from "path";
-import { createConnection } from "typeorm";
 
 export default async () => {
   if (NODE_ENV === "production") {
-    return await createConnection({
+    const connection = await createConnection({
       name: "default",
       type: "postgres",
       host: DB_HOST,
@@ -27,10 +29,12 @@ export default async () => {
       migrations: [path.resolve(__dirname, "migration/**/*.js")],
       subscribers: [path.resolve(__dirname, "subscriber/**/*.js")]
     });
+
+    return connection;
   }
 
   if (NODE_ENV === "test") {
-    return await createConnection({
+    const connection = await createConnection({
       name: "default",
       type: "postgres",
       host: DB_HOST,
@@ -45,7 +49,11 @@ export default async () => {
       migrations: [path.resolve(__dirname, "migration/**/*.ts")],
       subscribers: [path.resolve(__dirname, "subscriber/**/*.ts")]
     });
+
+    return connection;
   }
 
-  return await createConnection();
+  const connection = await createConnection();
+
+  return connection;
 };

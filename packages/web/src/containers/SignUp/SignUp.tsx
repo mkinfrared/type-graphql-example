@@ -1,6 +1,7 @@
 import React from "react";
 import { registerValidation } from "@bookstore/common";
 import { Formik } from "formik";
+import { WithSnackbarProps, withSnackbar } from "notistack";
 
 import SignUp from "components/SingUp";
 import { FormValues } from "components/SingUp/SignUp.type";
@@ -48,15 +49,18 @@ import { HandleSubmit } from "type/shared";
 //   );
 // };
 
-class Container extends React.Component<RegisterUserProps> {
+class Container extends React.Component<RegisterUserProps & WithSnackbarProps> {
   handleSubmit: HandleSubmit<FormValues> = async (values, formikBag) => {
+    const { enqueueSnackbar, mutate } = this.props;
     try {
-      await this.props.mutate({ variables: { ...values } });
+      await mutate({ variables: { ...values } });
+      enqueueSnackbar("You can now log in to website", { variant: "success" });
     } catch (e) {
-      console.log(e.graphQLErrors);
       if (e.graphQLErrors.length) {
         const { exception } = e.graphQLErrors[0].extensions;
         formikBag.setErrors(exception);
+      } else {
+        enqueueSnackbar("No connection with server", { variant: "error" });
       }
     }
   };
@@ -82,6 +86,6 @@ class Container extends React.Component<RegisterUserProps> {
   }
 }
 
-export default withRegisterUser()(Container);
+export default withRegisterUser()(withSnackbar(Container));
 
 export { Container };

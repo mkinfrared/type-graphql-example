@@ -1,14 +1,17 @@
-// import { redis } from "@util/redis";
+import http from "http";
+
 import { ApolloServer } from "apollo-server-express";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import connectRedis from "connect-redis";
-import cors from "cors";
+import { CorsOptions } from "cors";
 import express from "express";
 import session from "express-session";
 
+import { ServerContext } from "@type/Server.type";
+import validateTokens from "@middleware/validateTokens";
 import formatError from "@util/formatError";
 import {
-  // FRONTEND_HOST,
   NODE_ENV,
   REDIS_HOST,
   SERVER_ADDRESS,
@@ -21,17 +24,26 @@ const startServer = async () => {
   const RedisStore = connectRedis(session);
   const apolloServer = new ApolloServer({
     schema: await getSchema(),
-    formatError
+    formatError,
+    context: (context): ServerContext => ({
+      request: context.req,
+      response: context.res
+    })
   });
 
   const app = express();
 
-  app.use(
-    cors({
-      origin: "http://localhost:3000",
-      credentials: true
-    })
-  );
+  const cors: CorsOptions = {
+    credentials: true,
+    origin: ["http://localhost:3000", "http://localhost:4000"]
+  };
+
+  // app.use(
+  //   cors({
+  //     origin: "http://localhost:3000",
+  //     credentials: true
+  //   })
+  // );
 
   app.use(bodyParser.json());
 
@@ -52,16 +64,21 @@ const startServer = async () => {
     })
   );
 
-  apolloServer.applyMiddleware({ app });
+  app.use(cookieParser());
+  app.use(validateTokens);
 
-  const server = app.listen(SERVER_PORT, () => {
+  const httpServer = http.createServer(app);
+  apolloServer.applyMiddleware({ app, cors });
+  apolloServer.installSubscriptionHandlers(httpServer);
+
+  httpServer.listen(SERVER_PORT, () => {
     console.log(`Server is running on port ${SERVER_PORT}`);
     console.log(
-      `Documentation is available at ${SERVER_ADDRESS}:${SERVER_PORT}/graphql`
+      `Documentation is available at ${SERVER_ADDRESS}:${SERVER_PORT}${apolloServer.graphqlPath}`
     );
   });
 
-  return server;
+  return httpServer;
 };
 
 export default startServer;

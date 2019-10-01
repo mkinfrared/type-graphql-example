@@ -7,7 +7,7 @@ export default async (userID: string, redis: Redis, request: Request) => {
 
   await redis.set(id, userID, "EX", 60 * 60 * 24); // 24 hours
 
-  const link = request.protocol + "://" + request.headers.host;
+  const link = `${request.protocol}://${request.headers.host}`;
 
   return `${link}/confirm/${id}`;
 };
